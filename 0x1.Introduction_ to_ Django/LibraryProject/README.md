@@ -1,1 +1,1 @@
-This is a Django prject.
+This is a Django project.
