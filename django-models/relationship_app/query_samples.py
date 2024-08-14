@@ -2,7 +2,8 @@ from django.db.models import Q
 from .models import Author, Book, Library, Librarian
 
 # Query all books by a specific author
-author = Author.objects.get(name='John Doe')
+author_name = 'John Doe'
+author = Author.objects.get(name=author_name)
 books_by_author = Book.objects.filter(author=author)
 print("Books by John Doe:")
 for book in books_by_author:
