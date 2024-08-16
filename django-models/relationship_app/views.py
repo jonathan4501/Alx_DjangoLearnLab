@@ -28,6 +28,17 @@ def register(request):
         form = UserCreationForm()
     return render(request, 'templates/relationship_app/register.html', {'form': form})
 
+def admin_required(view_func):
+    def wrapper(request, *args, **kwargs):
+        if request.user.userprofile.role == 'Admin':
+            return view_func(request, *args, **kwargs)
+        return redirect('login')  # or any other page you want to redirect to
+    return wrapper
+
+@admin_required
+def admin_view(request):
+    return render(request, 'templates/relationship_app/admin_view.html')
+
 @user_passes_test(lambda u: u.userprofile.role == 'Admin')
 def admin_view(request):
     return render(request, 'templates/relationship_app/admin_view.html')
