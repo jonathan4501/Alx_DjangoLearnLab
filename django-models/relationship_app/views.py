@@ -8,6 +8,7 @@ from django.contrib.auth.forms import UserCreationForm
 from django.shortcuts import redirect
 from django.contrib.auth import login
 from django.contrib.auth.decorators import user_passes_test
+from django.contrib.auth.decorators import permission_required
 
 def list_books(request):
     books = Book.objects.all()
@@ -38,3 +39,26 @@ def librarian_view(request):
 @user_passes_test(lambda u: u.userprofile.role == 'Member')
 def member_view(request):
     return render(request, 'templates/relationship_app/member_view.html')
+
+@permission_required('relationship_app.can_add_book')
+def add_book(request):
+    if request.method == 'POST':
+        # Add book logic here
+        return redirect('book_list')
+    return render(request, 'relationship_app/add_book.html')
+
+@permission_required('relationship_app.can_change_book')
+def edit_book(request, pk):
+    book = Book.objects.get(pk=pk)
+    if request.method == 'POST':
+        # Edit book logic here
+        return redirect('book_list')
+    return render(request, 'relationship_app/edit_book.html', {'book': book})
+
+@permission_required('relationship_app.can_delete_book')
+def delete_book(request, pk):
+    book = Book.objects.get(pk=pk)
+    if request.method == 'POST':
+        # Delete book logic here
+        return redirect('book_list')
+    return render(request, 'relationship_app/delete_book.html', {'book': book})
