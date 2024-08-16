@@ -34,15 +34,7 @@ class Librarian(models.Model):
 
 class UserProfile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
-    ROLE_CHOICES = (
-        ('Admin', 'Admin'),
-        ('Librarian', 'Librarian'),
-        ('Member', 'Member'),
-    )
-    role = models.CharField(max_length=10, choices=ROLE_CHOICES)
-
-    def __str__(self):
-        return self.user.username
+    role = models.CharField(max_length=20, choices=['Admin', 'Librarian', 'Member'])
 
 
 @receiver(post_save, sender=User)
