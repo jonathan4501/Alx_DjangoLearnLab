@@ -35,6 +35,7 @@ def admin_required(view_func):
         return redirect('login')  # or any other page you want to redirect to
     return wrapper
 
+@permission_required('relationship_app.is_admin')
 @admin_required
 def admin_view(request):
     return render(request, 'templates/relationship_app/admin_view.html')
