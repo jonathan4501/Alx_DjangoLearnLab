@@ -140,3 +140,6 @@ SECURE_CONTENT_TYPE_NOSNIFF = True
 # Enforce HTTPS for cookies
 CSRF_COOKIE_SECURE = True
 SESSION_COOKIE_SECURE = True
+
+# Additional security settings
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
