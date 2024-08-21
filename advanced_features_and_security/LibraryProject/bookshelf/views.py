@@ -1,13 +1,33 @@
 from django.shortcuts import render, redirect
-from django.contrib.auth.decorators import permission_required
+from django.contrib.auth.decorators import permission_required, user_passes_test
 from django.db.models import Q
-from .models import Book
+from .models import Book, UserProfile
 from .forms import ExampleForm
 
 def book_list(request):
     search = request.GET.get('search', '')
     books = Book.objects.filter(Q(title__icontains=search) | Q(author__icontains=search))
     return render(request, 'book_list.html', {'books': books})
+
+def is_admin(user):
+    return user.userprofile.role == 'Admin'
+
+def is_librarian(user):
+    return user.userprofile.role == 'Librarian'
+
+def is_member(user):
+    return user.userprofile.role == 'Member'
+
+def admin_view(request):
+    return render(request, 'admin_view.html')
+
+@user_passes_test(is_librarian)
+def librarian_view(request):
+    return render(request, 'librarian_view.html')
+
+@user_passes_test(is_member)
+def member_view(request):
+    return render(request, 'member_view.html')
 
 @permission_required('bookshelf.can_create', raise_exception=True)
 def create_book(request):
