@@ -9,7 +9,7 @@ from django.contrib.auth.models import User
 class BookAPITestCase(APITestCase):
     def setUp(self):
         self.user = User.objects.create_superuser('testuser', 'testuser@gmail.com', 'password')
-        self.client.force_authenticate(user=self.user)
+        self.client.login(username='testuser', password='password')
         self.book1 = Book.objects.create(title='Book1', author='Author1', publication_year=2020)
         self.book2 = Book.objects.create(title='Book2', author='Author2', publication_year=2021)
 
@@ -107,3 +107,6 @@ class BookAPITestCase(APITestCase):
         data = {'username': 'testuser', 'password': 'wrongpassword'}
         response = self.client.post(reverse('rest_framework:login'), data, format='json')
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+
+    
