@@ -90,3 +90,20 @@ class BookAPITestCase(APITestCase):
     def test_order_books_by_title(self):
         response = self.client.get(reverse('book-list'), {'ordering': 'title'})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    def test_authentication_required(self):
+        self.client.force_authenticate(user=None)
+        response = self.client.get(reverse('book-list'))
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
+    def test_login_success(self):
+        self.client.force_authenticate(user=None)
+        data = {'username': 'testuser', 'password': 'password'}
+        response = self.client.post(reverse('rest_framework:login'), data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    def test_login_failure(self):
+        self.client.force_authenticate(user=None)
+        data = {'username': 'testuser', 'password': 'wrongpassword'}
+        response = self.client.post(reverse('rest_framework:login'), data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
