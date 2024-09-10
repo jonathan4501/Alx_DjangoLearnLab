@@ -1,13 +1,14 @@
 from django.shortcuts import render, redirect
 from django.contrib.auth import login, authenticate, logout
 from django.contrib.auth.forms import AuthenticationForm
+from django.contrib.auth.decorators import login_required 
 from .forms import RegistrationForm
 from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from .models import Post
 from .forms import PostForm
 
-
+@login_required
 def register(request):
     if request.method == 'POST':
         form = RegistrationForm(request.POST)
@@ -22,6 +23,7 @@ def register(request):
         form = RegistrationForm()
     return render(request, 'register.html', {'form': form})
 
+@login_required
 def login_view(request):
     if request.method == 'POST':
         form = AuthenticationForm(request, data=request.POST)
@@ -36,10 +38,12 @@ def login_view(request):
         form = AuthenticationForm()
     return render(request, 'login.html', {'form': form})
 
+@login_required
 def logout_view(request):
     logout(request)
     return redirect('home')
 
+@login_required
 def profile_view(request):
     if request.method == 'POST':
         user = request.user
@@ -82,3 +86,4 @@ class PostDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
 
     def test_func(self):
         return self.request.user == self.get_object().author
+
