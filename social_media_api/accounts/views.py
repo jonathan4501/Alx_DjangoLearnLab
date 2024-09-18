@@ -1,11 +1,12 @@
 from rest_framework import generics, permissions
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from .serializers import UserSerializer, TokenSerializer, Token
+from .serializers import UserSerializer, TokenSerializer, PostSerializer
 from django.contrib.auth import authenticate
 from rest_framework import status
 from .models import CustomUser, Post
 from .serializers import PostSerializer
+from rest_framework.authtoken.models import Token
 
 class RegisterView(APIView):
     def post(self, request):
@@ -30,6 +31,15 @@ class TokenView(APIView):
     def get(self, request):
         token = request.user.auth_token
         return Response({'token': token.key})
+
+class UserListView(generics.GenericAPIView):
+    permission_classes = [permissions.IsAuthenticated]
+    serializer_class = UserSerializer
+
+    def get(self, request):
+        users = CustomUser.objects.all()
+        serializer = self.serializer_class(users, many=True)
+        return Response(serializer.data)
 
 class FollowView(APIView):
     permission_classes = [permissions.IsAuthenticated]
