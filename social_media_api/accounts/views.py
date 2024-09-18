@@ -1,11 +1,10 @@
-from django.shortcuts import render
+from rest_framework import generics, permissions
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from .serializers import UserSerializer, TokenSerializer, Token
 from django.contrib.auth import authenticate
 from rest_framework import status
-from rest_framework.permissions import IsAuthenticated
-from .models import User, Post
+from .models import CustomUser, Post
 from .serializers import PostSerializer
 
 class RegisterView(APIView):
@@ -33,29 +32,29 @@ class TokenView(APIView):
         return Response({'token': token.key})
 
 class FollowView(APIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [permissions.IsAuthenticated]
 
     def post(self, request, user_id):
         try:
-            user_to_follow = User.objects.get(id=user_id)
+            user_to_follow = CustomUser.objects.get(id=user_id)
             request.user.following.add(user_to_follow)
             return Response(status=status.HTTP_200_OK)
-        except User.DoesNotExist:
+        except CustomUser.DoesNotExist:
             return Response(status=status.HTTP_404_NOT_FOUND)
 
 class UnfollowView(APIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [permissions.IsAuthenticated]
 
     def post(self, request, user_id):
         try:
-            user_to_unfollow = User.objects.get(id=user_id)
+            user_to_unfollow = CustomUser.objects.get(id=user_id)
             request.user.following.remove(user_to_unfollow)
             return Response(status=status.HTTP_200_OK)
-        except User.DoesNotExist:
+        except CustomUser.DoesNotExist:
             return Response(status=status.HTTP_404_NOT_FOUND)
         
 class FeedView(APIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [permissions.IsAuthenticated]
 
     def get(self, request):
         followed_users = request.user.following.all()
