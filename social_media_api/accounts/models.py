@@ -7,4 +7,7 @@ class CustomUser(AbstractUser):
     profile_picture = models.ImageField(upload_to='profile_pictures', blank=True)
     followers = models.ManyToManyField('self', symmetrical=False, related_name='following')
     groups = models.ManyToManyField(Group, related_name='custom_user_set')
-    user_permissions = models.ManyToManyField(Permission, related_name='custom_user_set')
+    user_permissions = models.ManyToManyField(Permission, related_name='custom_permissions')
+
+class User(AbstractUser):
+    following = models.ManyToManyField('self', symmetrical=False, blank=True)

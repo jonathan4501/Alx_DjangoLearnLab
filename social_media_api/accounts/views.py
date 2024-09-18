@@ -3,6 +3,10 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from .serializers import UserSerializer, TokenSerializer, Token
 from django.contrib.auth import authenticate
+from rest_framework import status
+from rest_framework.permissions import IsAuthenticated
+from .models import User, Post
+from .serializers import PostSerializer
 
 class RegisterView(APIView):
     def post(self, request):
@@ -27,3 +31,34 @@ class TokenView(APIView):
     def get(self, request):
         token = request.user.auth_token
         return Response({'token': token.key})
+
+class FollowView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, user_id):
+        try:
+            user_to_follow = User.objects.get(id=user_id)
+            request.user.following.add(user_to_follow)
+            return Response(status=status.HTTP_200_OK)
+        except User.DoesNotExist:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+
+class UnfollowView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, user_id):
+        try:
+            user_to_unfollow = User.objects.get(id=user_id)
+            request.user.following.remove(user_to_unfollow)
+            return Response(status=status.HTTP_200_OK)
+        except User.DoesNotExist:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+        
+class FeedView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        followed_users = request.user.following.all()
+        posts = Post.objects.filter(author__in=followed_users).order_by('-created_at')
+        serializer = PostSerializer(posts, many=True)
+        return Response(serializer.data)
