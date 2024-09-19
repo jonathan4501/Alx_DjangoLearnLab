@@ -25,3 +25,31 @@
 * **Description:** Get the feed of posts from followed users.
 * **Request Body:** None
 * **Response:** A list of posts in JSON format, ordered by creation date.
+
+**Likes Endpoints**
+
+### Like a Post
+
+* **POST** `/posts/<int:pk>/like/`
+* Request Body: None
+* Response: `Like` object with `id`, `post`, `user`, and `created_at` fields
+
+### Unlike a Post
+
+* **POST** `/posts/<int:pk>/unlike/`
+* Request Body: None
+* Response: `message` field with "Post unliked" or "You did not like this post"
+
+**Notifications Endpoints**
+
+### Get Notifications
+
+* **GET** `/notifications/`
+* Request Body: None
+* Response: List of `Notification` objects with `id`, `recipient`, `actor`, `verb`, `target`, and `timestamp` fields
+
+### Create Notification
+
+* **POST** `/notifications/`
+* Request Body: `verb`, `target_id`, and `target_model` fields
+* Response: `Notification` object with `id`, `recipient`, `actor`, `verb`, `target`, and `timestamp` fields

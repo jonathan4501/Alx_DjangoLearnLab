@@ -1,11 +1,13 @@
 from django.shortcuts import render
 from rest_framework import viewsets, permissions
-from .models import Post, Comment
-from .serializers import PostSerializer, CommentSerializer
+from .models import Post, Comment, Like
+from .serializers import PostSerializer, CommentSerializer, LikeSerializer
 from rest_framework.pagination import PageNumberPagination
 from rest_framework import filters
 from .pagination import StandardResultsSetPagination
 from .permissions import IsFollowing
+from rest_framework.response import Response
+from rest_framework.views import APIView
 
 class IsOwnerOrReadOnly(permissions.BasePermission):
     def has_object_permission(self, request, view, obj):
@@ -46,3 +48,23 @@ class FollowingPostsViewSet(viewsets.ReadOnlyModelViewSet):
     def get_queryset(self):
         following_users = self.request.user.following.all()
         return Post.objects.filter(author__in=following_users).order_by('-created_at')
+    
+class LikePostView(APIView):
+    def post(self, request, pk):
+        post = Post.objects.get(pk=pk)
+        user = request.user
+        if Like.objects.filter(post=post, user=user).exists():
+            return Response({'error': 'You already liked this post'})
+        like = Like.objects.create(post=post, user=user)
+        serializer = LikeSerializer(like)
+        return Response(serializer.data)
+
+class UnlikePostView(APIView):
+    def post(self, request, pk):
+        post = Post.objects.get(pk=pk)
+        user = request.user
+        like = Like.objects.filter(post=post, user=user).first()
+        if like:
+            like.delete()
+            return Response({'message': 'Post unliked'})
+        return Response({'error': 'You did not like this post'})
