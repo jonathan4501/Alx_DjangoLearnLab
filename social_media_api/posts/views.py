@@ -5,6 +5,7 @@ from .serializers import PostSerializer, CommentSerializer
 from rest_framework.pagination import PageNumberPagination
 from rest_framework import filters
 from .pagination import StandardResultsSetPagination
+from .permissions import IsFollowing
 
 class IsOwnerOrReadOnly(permissions.BasePermission):
     def has_object_permission(self, request, view, obj):
@@ -36,3 +37,12 @@ class StandardResultsSetPagination(PageNumberPagination):
     page_size = 10
     page_size_query_param = 'page_size'
     max_page_size = 100
+
+class FollowingPostsViewSet(viewsets.ReadOnlyModelViewSet):
+    serializer_class = PostSerializer
+    permission_classes = [IsFollowing]
+    pagination_class = StandardResultsSetPagination
+
+    def get_queryset(self):
+        following_users = self.request.user.following.all()
+        return Post.objects.filter(author__in=following_users).order_by('-created_at')

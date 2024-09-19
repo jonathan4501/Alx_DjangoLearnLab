@@ -1,6 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser, Group, Permission
 from django.db import models
+from django.conf import settings
 
 class CustomUser(AbstractUser):
     bio = models.TextField(blank=True)
@@ -11,3 +12,7 @@ class CustomUser(AbstractUser):
 
 class User(AbstractUser):
     following = models.ManyToManyField('self', symmetrical=False, blank=True)
+
+class Follow(models.Model):
+    from_user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='follows')
+    to_user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='followers')
