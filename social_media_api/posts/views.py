@@ -53,9 +53,9 @@ class FollowingPostsViewSet(viewsets.ReadOnlyModelViewSet):
 
 class LikePostView(APIView):
     def post(self, request, pk):
-        post = get_object_or_404(Post, pk=pk)
+        post = generics.get_object_or_404(Post, pk=pk)
         user = request.user
-        like, created = Like.objects.get_or_create(user=user, post=post)
+        like, created = Like.objects.get_or_create(user=request.user, post=post)
         if created:
             notification = Notification.objects.create(
                 sender=user,
@@ -69,7 +69,7 @@ class LikePostView(APIView):
 
 class UnlikePostView(APIView):
     def post(self, request, pk):
-        post = get_object_or_404(Post, pk=pk)
+        post = generics.get_object_or_404(Post, pk=pk)
         user = request.user
         like = Like.objects.filter(post=post, user=user).first()
         if like:
