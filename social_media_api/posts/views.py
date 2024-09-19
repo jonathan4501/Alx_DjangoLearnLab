@@ -8,6 +8,8 @@ from .pagination import StandardResultsSetPagination
 from .permissions import IsFollowing
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from rest_framework.generics import get_object_or_404
+from .models import Notification
 
 class IsOwnerOrReadOnly(permissions.BasePermission):
     def has_object_permission(self, request, view, obj):
@@ -48,23 +50,37 @@ class FollowingPostsViewSet(viewsets.ReadOnlyModelViewSet):
     def get_queryset(self):
         following_users = self.request.user.following.all()
         return Post.objects.filter(author__in=following_users).order_by('-created_at')
-    
+
 class LikePostView(APIView):
     def post(self, request, pk):
-        post = Post.objects.get(pk=pk)
+        post = get_object_or_404(Post, pk=pk)
         user = request.user
-        if Like.objects.filter(post=post, user=user).exists():
-            return Response({'error': 'You already liked this post'})
-        like = Like.objects.create(post=post, user=user)
-        serializer = LikeSerializer(like)
-        return Response(serializer.data)
+        like, created = Like.objects.get_or_create(user=user, post=post)
+        if created:
+            notification = Notification.objects.create(
+                sender=user,
+                receiver=post.author,
+                post=post,
+                notification_type='like'
+            )
+            serializer = LikeSerializer(like)
+            return Response(serializer.data)
+        return Response({'error': 'You already liked this post'})
 
 class UnlikePostView(APIView):
     def post(self, request, pk):
-        post = Post.objects.get(pk=pk)
+        post = get_object_or_404(Post, pk=pk)
         user = request.user
         like = Like.objects.filter(post=post, user=user).first()
         if like:
             like.delete()
+            notification = Notification.objects.filter(
+                sender=user,
+                receiver=post.author,
+                post=post,
+                notification_type='like'
+            ).first()
+            if notification:
+                notification.delete()
             return Response({'message': 'Post unliked'})
         return Response({'error': 'You did not like this post'})
